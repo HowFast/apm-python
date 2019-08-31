@@ -19,7 +19,7 @@ Only the Flask middleware is currently available.
 
 .. code:: python
 
-    from howfast-apm.flask import HowFastMiddleware
+    from howfast_apm.flask import HowFastMiddleware
 
     # Create your Flask app
     app = Flask(__name__, ...)
@@ -55,5 +55,5 @@ You can also choose to exclude some URLs from reporting:
 
     app.wsgi_app = HowFastMiddleware(
         app.wsgi_app,
-        endpoints_blacklist=[f'/some/internal/url/'],
+        endpoints_blacklist=['/some/internal/url/'],
     )
