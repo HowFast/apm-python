@@ -23,8 +23,7 @@ jobs:
           name: install dependencies
           command: |
             apk add --no-cache make bash
-            pip install . pytest pytest-cov flask tox tox-pyenv
-            pyenv local 2.7.10 3.4.3 3.5.0
+            pip install . pytest pytest-cov flask
       - run:
           name: run tests
           command: pytest .

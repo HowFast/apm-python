@@ -59,5 +59,5 @@ class HowFastMiddleware(CoreAPM):
             uri=uri,
         )
         # TODO: remove this once overhead has been measured in production
-        logger.info(f"overhead when saving the point: {(timer() - end)*1000:.3f}ms")
+        logger.info("overhead when saving the point: %.3fms", (timer() - end) * 1000)
         return return_value
