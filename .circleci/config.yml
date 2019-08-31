@@ -1,19 +1,5 @@
 version: 2
 jobs:
-  build-python27:
-    docker:
-      - image: python:2.7-alpine3.8
-    steps:
-      - checkout
-      - run:
-          name: install dependencies
-          command: |
-            apk add --no-cache make bash
-            pip install . pytest pytest-cov flask
-      - run:
-          name: run tests
-          command: pytest .
-
   build-python37:
     docker:
       - image: python:3.7-alpine3.8
@@ -33,5 +19,4 @@ workflows:
   version: 2
   build:
     jobs:
-      - build-python27
       - build-python37
