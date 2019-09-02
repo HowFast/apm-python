@@ -15,6 +15,14 @@ flask_requires = (
     'blinker>=1.1',
 )
 
+tests_requires = (
+    'coverage<4',
+    'flake8==3.5.0',
+    'pytest>=3.2.0,<3.3.0',
+    'requests',
+    'tox',
+) + flask_requires
+
 setup(
     name='howfast-apm',
 
@@ -80,6 +88,7 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         'flask': flask_requires,
+        'test': tests_requires,
     },
 
     # If there are data files included in your packages that need to be
