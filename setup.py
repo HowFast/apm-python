@@ -10,13 +10,18 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
+flask_requires = (
+    'Flask>=0.8',
+    'blinker>=1.1',
+)
+
 setup(
     name='howfast-apm',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.1.1',
+    version='0.2.0',
     # Description displayed in documentation and PyPi
     description='Lightweight Application Performance Monitoring ' +
     'middleware that measures and reports performance data to HowFast APM',
@@ -65,9 +70,6 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        # TODO: remove this dependency once this package supports other frameworks
-        # TODO: be more specific about the supported versions of Flask
-        'flask',
         # TODO: consider native packages (urllib) to remove this dependency
         'requests',
     ],
@@ -76,7 +78,9 @@ setup(
     # dependencies). You can install these using the following syntax,
     # for example:
     # $ pip install -e .[dev,test]
-    extras_require={},
+    extras_require={
+        'flask': flask_requires,
+    },
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these

@@ -10,7 +10,7 @@ To install / update the module:
 
 .. code:: bash
 
-    pip install howfast-apm
+    pip install howfast-apm[flask]
 
 Usage
 -------
@@ -27,10 +27,7 @@ Only the Flask middleware is currently available.
     # Instanciate all your other middlewares first
 
     # Setup the APM middleware last, so that it can track the time spent inside other middlewares
-    app.wsgi_app = HowFastMiddleware(
-        app.wsgi_app,
-        app_id=HOWFAST_APM_DSN,
-    )
+    HowFastMiddleware(app, app_id=HOWFAST_APM_DSN)
 
 Configuration
 -------------
@@ -47,13 +44,15 @@ If the environment variable is defined you can then use:
 
 .. code:: python
 
-    app.wsgi_app = HowFastMiddleware(app.wsgi_app)
+    # Install the middleware
+    HowFastMiddleware(app)
 
 You can also choose to exclude some URLs from reporting:
 
 .. code:: python
 
-    app.wsgi_app = HowFastMiddleware(
-        app.wsgi_app,
+    # Do not report performance data for some URLs
+    HowFastMiddleware(
+        app,
         endpoints_blacklist=['/some/internal/url/'],
     )

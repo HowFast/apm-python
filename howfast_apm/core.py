@@ -46,6 +46,7 @@ class CoreAPM(object):
             time_elapsed: float,  # seconds
             method: str,
             uri: str,
+            endpoint: str = None,  # function name handling the request
     ) -> None:
         """ Save a request/response performance information """
         item = (
@@ -53,6 +54,7 @@ class CoreAPM(object):
             time_elapsed,
             method,
             uri,
+            endpoint,
         )
         # Capped queue
         pushed = False

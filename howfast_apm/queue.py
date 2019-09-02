@@ -83,8 +83,9 @@ class Runner(Thread):
             time_elapsed,
             method,
             uri,
+            endpoint,
         ) = point
-        return (method, uri, time_request_started.isoformat(), time_elapsed)
+        return (method, uri, time_request_started.isoformat(), time_elapsed, endpoint)
 
     def send_batch(self):
         """ Process one performance point """
