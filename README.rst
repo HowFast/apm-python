@@ -1,7 +1,11 @@
 HowFast APM for Python servers
 ==============================
 
-Light instrumentation of your Python server for reporting performance data to HowFast APM.
+Light instrumentation of your Python server for reporting performance data to `HowFast APM <https://www.howfast.tech/>`_.
+
+.. image:: https://github.com/HowFast/apm-python/blob/master/screenshot.png
+    :align: center
+    :alt: Screenshot from HowFast APM
 
 Install
 -------
