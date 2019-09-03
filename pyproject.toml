@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "howfast-apm"
-version = "0.2.0"
+version = "0.2.1"
 description = "Lightweight Application Performance Monitoring middleware that measures and reports performance data to HowFast APM."
 authors = ["Mickaël Bergem <mickael@howfast.tech>"]
 license = "MIT"
