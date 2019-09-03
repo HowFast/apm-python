@@ -9,7 +9,7 @@ jobs:
           name: install dependencies
           command: |
             apk add --no-cache make bash
-            pip install . pytest pytest-cov flask
+            pip install .[flask] pytest pytest-cov flask
       - run:
           name: run tests
           command: pytest .
