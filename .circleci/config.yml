@@ -8,8 +8,8 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            apk add --no-cache make bash
-            pip install .[flask] pytest pytest-cov flask
+            pip install poetry
+            poetry install -v -E flask
       - run:
           name: run tests
           command: pytest .
