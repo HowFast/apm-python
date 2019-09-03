@@ -19,7 +19,7 @@ Only the Flask middleware is currently available.
 
 .. code:: python
 
-    from howfast_apm.flask import HowFastMiddleware
+    from howfast_apm import HowFastMiddleware
 
     # Create your Flask app
     app = Flask(__name__, ...)
