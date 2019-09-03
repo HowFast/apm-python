@@ -63,7 +63,7 @@ class Runner(Thread):
 
         except Empty:
             pass
-        except Exception as err:
+        except Exception:
             logger.error("Runner crashed:", exc_info=True)
             return
 

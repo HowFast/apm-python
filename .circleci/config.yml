@@ -20,6 +20,10 @@ jobs:
             - /home/circleci/.cache/pypoetry/virtualenvs
 
       - run:
+          name: lint code
+          command: poetry run flake8 howfast_apm
+
+      - run:
           name: run tests
           command: pytest .
 
