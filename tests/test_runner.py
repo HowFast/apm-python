@@ -61,6 +61,3 @@ def test_queue_full(send_mocked, queue_full):
     runner.run_once()
     assert len(runner.current_batch) == 5
     assert queue_full.qsize() == 0
-
-
-# TODO: test what happens when with the core when the queue gets full
