@@ -25,7 +25,7 @@ jobs:
 
       - run:
           name: run tests
-          command: pytest .
+          command: poetry run pytest .
 
 
 workflows:
