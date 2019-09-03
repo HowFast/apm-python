@@ -2,14 +2,23 @@ version: 2
 jobs:
   build-python37:
     docker:
-      - image: python:3.7-alpine3.8
+      - image: circleci/python:3.6.8
     steps:
       - checkout
+
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "poetry.lock" }}
+
       - run:
           name: install dependencies
-          command: |
-            pip install poetry
-            poetry install -v -E flask
+          command: poetry install -v -E flask
+
+      - save_cache:
+          key: deps-{{ checksum "poetry.lock" }}
+          paths:
+            - /home/circleci/.cache/pypoetry/virtualenvs
+
       - run:
           name: run tests
           command: pytest .

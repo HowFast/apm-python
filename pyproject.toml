@@ -25,13 +25,13 @@ classifiers=[
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.6,<3.8"
+python = ">=3.6,<3.9"
 requests = "^2.22"
-flask = {version = "^0.8", optional = true}
-blinker = {version = "^1.1", optional = true}
+flask = {version = ">=0.8", optional = true}
+blinker = {version = ">=1.1", optional = true}
 
 [tool.poetry.dev-dependencies]
-pytest = "^3.4"
+pytest = "^5"
 coverage = "^4.5"
 flake8 = "^3.7"
 yapf = "^0.28.0"
