@@ -1,5 +1,7 @@
 # HowFast APM agent for Python
 
+[![CircleCI](https://circleci.com/gh/HowFast/apm-python.svg?style=svg)](https://circleci.com/gh/HowFast/apm-python)
+
 This Python APM (Application Performance Monitoring) agent sends performance data to your
 [HowFast](https://www.howfast.tech/) account.
 
