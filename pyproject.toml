@@ -36,6 +36,7 @@ coverage = "^4.5"
 flake8 = "^3.7"
 yapf = "^0.28.0"
 mypy = "^0.720.0"
+coveralls = "^1.8"
 
 [tool.poetry.extras]
 flask = ["flask", "blinker"]
