@@ -10,7 +10,7 @@ from .core import CoreAPM
 logger = logging.getLogger('howfast_apm')
 
 
-class HowFastMiddleware(CoreAPM):
+class HowFastFlaskMiddleware(CoreAPM):
     """
     Flask middleware to measure how much time is spent per endpoint.
 

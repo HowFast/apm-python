@@ -19,7 +19,7 @@ Only the Flask middleware is currently available.
 
 .. code:: python
 
-    from howfast_apm import HowFastMiddleware
+    from howfast_apm import HowFastFlaskMiddleware
 
     # Create your Flask app
     app = Flask(__name__, ...)
@@ -27,13 +27,13 @@ Only the Flask middleware is currently available.
     # Instanciate all your other middlewares first
 
     # Setup the APM middleware last, so that it can track the time spent inside other middlewares
-    HowFastMiddleware(app, app_id=HOWFAST_APM_DSN)
+    HowFastFlaskMiddleware(app, app_id=HOWFAST_APM_DSN)
 
 Configuration
 -------------
 
 You can configure the APM through environment variables. If they are defined, those variables will
-be used. Parameters passed to the ``HowFastMiddleware`` constructor take precedence over environment
+be used. Parameters passed to the ``HowFastFlaskMiddleware`` constructor take precedence over environment
 variables.
 
 Only one variable is available for now:
@@ -45,14 +45,14 @@ If the environment variable is defined you can then use:
 .. code:: python
 
     # Install the middleware
-    HowFastMiddleware(app)
+    HowFastFlaskMiddleware(app)
 
 You can also choose to exclude some URLs from reporting:
 
 .. code:: python
 
     # Do not report performance data for some URLs
-    HowFastMiddleware(
+    HowFastFlaskMiddleware(
         app,
         endpoints_blacklist=['/some/internal/url/'],
     )

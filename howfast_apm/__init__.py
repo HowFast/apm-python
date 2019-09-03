@@ -1,1 +1,1 @@
-from .flask import HowFastMiddleware
+from .flask import HowFastFlaskMiddleware
