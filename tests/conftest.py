@@ -28,6 +28,14 @@ def example_queue_items_gen():
                 f'/call/{id}',
                 'controllers.endpoint_name',
             )
+            # Alternate between an endpoint or no endpoint
+            yield (
+                datetime.now(timezone.utc),
+                0.04,
+                'GET',
+                f'/call/{id}',
+                None,
+            )
 
     yield generator()
 
@@ -38,8 +46,8 @@ def queue() -> Queue:
 
 
 @pytest.fixture
-def queue_full(example_queue_item) -> Queue:
+def queue_full(example_queue_items_gen) -> Queue:
     queue = Queue(maxsize=10)
     for i in range(10):
-        queue.put_nowait(example_queue_item)
+        queue.put_nowait(next(example_queue_items_gen))
     return queue
