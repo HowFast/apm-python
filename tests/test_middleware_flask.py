@@ -24,6 +24,8 @@ def HowFastFlaskMiddleware():
     """ Patch the save_point() method """
     from howfast_apm import HowFastFlaskMiddleware
     HowFastFlaskMiddleware.save_point = MagicMock()
+    # Prevent the background thread to actually start
+    HowFastFlaskMiddleware.start_background_thread = MagicMock()
     return HowFastFlaskMiddleware
 
 
