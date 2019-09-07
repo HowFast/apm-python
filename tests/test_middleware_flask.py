@@ -75,7 +75,7 @@ def test_with_path_parameter(HowFastFlaskMiddleware):
     assert response.status_code == 200
     assert HowFastFlaskMiddleware.save_point.call_count == 1
     point = HowFastFlaskMiddleware.save_point.call_args[1]
-    assert point.get('endpoint') is not None
+    assert point.get('endpoint') == "names"
 
 
 def test_blacklist_option(HowFastFlaskMiddleware):
