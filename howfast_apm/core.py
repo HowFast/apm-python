@@ -1,10 +1,11 @@
 import os
 import logging
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from queue import Full, Empty
 
 from .queue import queue, Runner
+from .hook_requests import install_hooks, Interaction
 
 logger = logging.getLogger('howfast_apm')
 
@@ -14,9 +15,15 @@ class CoreAPM(object):
     Base class that provides the shared code for:
     * starting the background thread
     * pushing points to the queue
+    * storing external interactions
     """
 
     app_id: Optional[str]
+
+    interactions: List[Interaction] = []
+
+    def __init__(self):
+        self.interactions = []
 
     def setup(
             self,
@@ -31,6 +38,7 @@ class CoreAPM(object):
         if self.app_id:
             logger.info(f"HowFast APM configured with DSN {self.app_id}")
             self.start_background_thread()
+            self.setup_hooks()
         else:
             logger.warning(f"HowFast APM initialized with no DSN, reporting will be disabled.")
 
@@ -39,6 +47,14 @@ class CoreAPM(object):
         self.runner = Runner(queue=queue, app_id=self.app_id)
         self.runner.start()
         # TODO: stop the thread at some point?
+
+    def setup_hooks(self) -> None:
+        """ Install hooks to register what is slow """
+        install_hooks(self.record_interaction)
+
+    def record_interaction(self, interaction: Interaction) -> None:
+        """ Save the interaction """
+        self.interactions.append(interaction)
 
     @staticmethod
     def save_point(

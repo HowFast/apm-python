@@ -47,6 +47,8 @@ class HowFastFlaskMiddleware(CoreAPM):
 
         request_started.connect(self._request_started)
 
+        super(CoreAPM, self).__init__()
+
     def __call__(self, environ, start_response):
         if not self.app_id:
             # HF APM not configured, return early to save some time
