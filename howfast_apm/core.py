@@ -4,6 +4,7 @@ from typing import Optional, List
 from datetime import datetime
 from queue import Full, Empty
 
+from .config import HOWFAST_APM_RECORD_INTERACTIONS
 from .queue import queue, Runner
 from .hook_requests import install_hooks, Interaction
 
@@ -20,9 +21,12 @@ class CoreAPM(object):
 
     app_id: Optional[str]
 
+    record_interactions: bool
     interactions: List[Interaction] = []
 
-    def __init__(self):
+    def __init__(self, record_interactions=HOWFAST_APM_RECORD_INTERACTIONS):
+        self.record_interactions = bool(record_interactions)
+        logger.info("Interactions will %s", 'be enabled' if self.record_interactions else 'NOT be enabled')
         self.interactions = []
 
     def setup(
@@ -38,7 +42,8 @@ class CoreAPM(object):
         if self.app_id:
             logger.info(f"HowFast APM configured with DSN {self.app_id}")
             self.start_background_thread()
-            self.setup_hooks()
+            if self.record_interactions:
+                self.setup_hooks()
         else:
             logger.warning(f"HowFast APM initialized with no DSN, reporting will be disabled.")
 

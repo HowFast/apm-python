@@ -96,3 +96,14 @@ def test_blacklist_option(HowFastFlaskMiddleware):
     response = tester.get('/name/test-34abc')
     assert response.status_code == 200
     assert HowFastFlaskMiddleware.save_point.called is False
+
+
+def test_interactions_option(HowFastFlaskMiddleware):
+    """ The record_interactions parameter should be accepted """
+    app = create_app()
+    HowFastFlaskMiddleware(
+        app,
+        app_id='some-dsn',
+        record_interactions=True,
+    )
+    # TODO: write assertions
