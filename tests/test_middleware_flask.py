@@ -84,10 +84,15 @@ def test_blacklist_option(HowFastFlaskMiddleware):
     HowFastFlaskMiddleware(
         app,
         app_id='some-dsn',
-        endpoints_blacklist=['/name/toto'],
+        endpoints_blacklist=['/name/toto', '/name/test-*'],
     )
 
     tester = app.test_client()
     response = tester.get('/name/toto')
+    assert response.status_code == 200
+    assert HowFastFlaskMiddleware.save_point.called is False
+
+    # Matching with patterns
+    response = tester.get('/name/test-34abc')
     assert response.status_code == 200
     assert HowFastFlaskMiddleware.save_point.called is False
