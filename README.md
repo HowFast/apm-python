@@ -41,3 +41,14 @@ poetry run pytest
 pip install tox tox-pyenv
 tox
 ```
+
+## Publish
+
+```bash
+# Replace "minor" by "patch" or "major" depending how you want to bump the version
+poetry version minor
+# Commit the changes
+git add pyproject.toml && git commit -m "Bump version"
+# Build and publish
+poetry publish --build
+```
