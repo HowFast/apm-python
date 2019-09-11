@@ -58,5 +58,11 @@ You can also choose to exclude some URLs from reporting:
     # Do not report performance data for some URLs
     HowFastFlaskMiddleware(
         app,
-        endpoints_blacklist=['/some/internal/url/'],
+        endpoints_blacklist=[
+            '/some/internal/url/',
+            # You can also use patterns accepted by Python's `fnmatch.fnmatch`, shell-like:
+            '/admin/*',
+            '/jobs/*/results',
+            '/endpoint/?',  # will blacklist /endpoint and /endpoint/
+        ],
     )

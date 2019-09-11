@@ -6,6 +6,7 @@ from flask.signals import request_started
 from flask import Flask, request
 
 from .core import CoreAPM
+from .utils import is_in_blacklist
 
 logger = logging.getLogger('howfast_apm')
 
@@ -53,7 +54,7 @@ class HowFastFlaskMiddleware(CoreAPM):
 
         uri = environ.get('PATH_INFO')
 
-        if uri in self.endpoints_blacklist:
+        if is_in_blacklist(uri, self.endpoints_blacklist):
             # Endpoint blacklist, return now
             return self.wsgi_app(environ, start_response)
 
