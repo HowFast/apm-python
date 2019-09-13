@@ -76,16 +76,16 @@ class Runner(Thread):
             return
 
     @staticmethod
-    def serialize_point(point: tuple) -> tuple:
+    def serialize_point(point: dict) -> tuple:
         """ Prepare the point to be sent to the API """
-        (
-            time_request_started,
-            time_elapsed,
-            method,
-            uri,
-            endpoint,
-        ) = point
-        return (method, uri, time_request_started.isoformat(), time_elapsed, endpoint)
+        return (
+            point['method'],
+            point['uri'],
+            point['time_request_started'].isoformat(),
+            point['time_elapsed'],
+            point['endpoint'],
+            point['interactions'],
+        )
 
     def send_batch(self):
         """ Process one performance point """

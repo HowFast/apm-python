@@ -1,17 +1,24 @@
 import pytest
 from datetime import datetime, timezone
 from queue import Queue
+# TODO: pytest refuses to start when this line is present :/
+from howfast_apm.hook_requests import Interaction
 
 
 @pytest.fixture
 def example_queue_item():
-    return (
-        datetime.now(timezone.utc),
-        0.04,
-        'PUT',
-        '/look/here',
-        'controllers.endpoint_name',
-    )
+    interactions = [
+        Interaction('request', 'https://www.example.org/req1', 0.01),
+        Interaction('request', 'https://www.example.org/req2', 0.02),
+    ]
+    return {
+        'time_request_started': datetime.now(timezone.utc),
+        'time_elapsed': 0.04,
+        'method': 'PUT',
+        'uri': '/look/here',
+        'endpoint': 'controllers.endpoint_name',
+        'interactions': interactions,
+    }
 
 
 @pytest.fixture
@@ -21,21 +28,23 @@ def example_queue_items_gen():
     def generator():
         id = 1
         while True:
-            yield (
-                datetime.now(timezone.utc),
-                0.04,
-                'PUT',
-                f'/call/{id}',
-                'controllers.endpoint_name',
-            )
+            yield {
+                'time_request_started': datetime.now(timezone.utc),
+                'time_elapsed': 0.04,
+                'method': 'PUT',
+                'uri': f'/call/{id}',
+                'endpoint': 'controllers.endpoint_name',
+                'interactions': [Interaction('request', f'https://www.example.org/req{id}', 0.02)],
+            }
             # Alternate between an endpoint or no endpoint
-            yield (
-                datetime.now(timezone.utc),
-                0.04,
-                'GET',
-                f'/call/{id}',
-                None,
-            )
+            yield {
+                'time_request_started': datetime.now(timezone.utc),
+                'time_elapsed': 0.04,
+                'method': 'GET',
+                'uri': f'/call/{id}',
+                'endpoint': None,
+                'interactions': [],
+            }
 
     yield generator()
 

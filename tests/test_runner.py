@@ -1,4 +1,4 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from howfast_apm.queue import Runner
 
@@ -80,12 +80,15 @@ def test_send_batch(mocked_post, queue_full):
     # queue_full has 10 elements
     assert len(points) == 10
     assert isinstance(points[0], tuple)
-    assert len(points[0]) == 5
-    assert len(points[1]) == 5
+    assert len(points[0]) == 6
+    assert len(points[1]) == 6
     # Make sure we have the correct point
-    (method, uri, time_request_started, elapsed, endpoint) = points[0]
+    (method, uri, time_request_started, elapsed, endpoint, interactions) = points[0]
     assert method == 'PUT'
     assert uri == '/call/1'
+    assert len(interactions) == 1
+    assert interactions[0].type == 'request'
+    assert interactions[0].name == 'https://www.example.org/req1'
 
 
 @patch('requests.post')
