@@ -1,4 +1,3 @@
-from unittest.mock import patch
 from queue import Queue
 from howfast_apm import core
 
@@ -9,18 +8,18 @@ def test_capped_queue(example_queue_items_gen):
     core.queue = Queue(maxsize=10)
     # Save one point
     assert core.queue.qsize() == 0
-    core.CoreAPM.save_point(*next(example_queue_items_gen))
+    core.CoreAPM._save_point(**next(example_queue_items_gen))
     assert core.queue.qsize() == 1
 
     # Save a second point
-    core.CoreAPM.save_point(*next(example_queue_items_gen))
+    core.CoreAPM._save_point(**next(example_queue_items_gen))
     assert core.queue.qsize() == 2
 
     # Fill the queue
     for i in range(8):
-        item = list(next(example_queue_items_gen))
-        item[3] = f'/call/{i}'  # update the URL to keep track of points
-        core.CoreAPM.save_point(*item)
+        item = next(example_queue_items_gen)
+        item['uri'] = f'/call/{i}'  # update the URL to keep track of points
+        core.CoreAPM._save_point(**item)
     assert core.queue.qsize() == 10
     assert core.queue.full()
 
@@ -34,12 +33,12 @@ def test_capped_queue_full(example_queue_item):
     core.queue = Queue(maxsize=10)
     # Fill the queue
     for i in range(10):
-        item = list(example_queue_item)
-        item[3] = f'/call/{i}'  # update the URL to keep track of points
-        core.CoreAPM.save_point(*item)
+        item = example_queue_item
+        item['uri'] = f'/call/{i}'  # update the URL to keep track of points
+        core.CoreAPM._save_point(**item)
     assert core.queue.full()
 
     # Add one more item to the full queue
-    core.CoreAPM.save_point(*example_queue_item)
+    core.CoreAPM._save_point(**example_queue_item)
     assert core.queue.full(), 'queue should still be full'
     assert core.queue.qsize() == 10

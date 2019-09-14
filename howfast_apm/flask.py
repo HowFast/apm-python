@@ -31,7 +31,11 @@ class HowFastFlaskMiddleware(CoreAPM):
             app_id: str = None,
             # Endpoints not to monitor
             endpoints_blacklist: List[str] = None,
+            # Other configuration parameters passed to the CoreAPM constructor
+            **kwargs,
     ):
+        super().__init__(**kwargs)
+
         self.app = app
         self.wsgi_app = app.wsgi_app
         # Overwrite the WSGI application
