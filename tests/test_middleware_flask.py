@@ -19,7 +19,7 @@ def create_app():
 
     @app.route('/external-call')
     def external_call():
-        requests.put('https://do-not-exists/')
+        requests.put('https://does-not-exist/')
         return 'ok'
 
     return app
@@ -130,4 +130,4 @@ def test_interactions_option(put_mocked, HowFastFlaskMiddleware):
     assert len(point.get('interactions')) == 1
     [interaction] = point['interactions']
     assert interaction.type == 'request'
-    assert interaction.name == 'https://do-not-exists/'
+    assert interaction.name == 'https://does-not-exist/'

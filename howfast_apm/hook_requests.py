@@ -42,7 +42,7 @@ def install_hooks(record_interaction: Callable[[Interaction], Any]) -> None:
         # Maybe requests is not installed / available in the instrumented code
         patch_requests_module = False
 
-    urllib = sys.modules['urllib']
+    tmp_urllib = sys.modules['urllib']
     if patch_requests_module:
         tmp_requests = sys.modules['requests']
 
@@ -72,11 +72,11 @@ def install_hooks(record_interaction: Callable[[Interaction], Any]) -> None:
         return patched_request
 
     # TODO: build method extractor for urlopen
-    urllib.request.urlopen = get_patched(
-        urllib.request.urlopen,
+    tmp_urllib.request.urlopen = get_patched(
+        tmp_urllib.request.urlopen,
         lambda *args, **kwargs: [None, None],
     )
-    sys.modules['urllib'] = urllib
+    sys.modules['urllib'] = tmp_urllib
 
     if patch_requests_module:
         tmp_requests.request = get_patched(
