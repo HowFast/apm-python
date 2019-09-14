@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, timezone
 from queue import Queue
-# TODO: pytest refuses to start when this line is present :/
+
 from howfast_apm.hook_requests import Interaction
 
 
