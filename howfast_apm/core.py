@@ -64,7 +64,14 @@ class CoreAPM(object):
     def reset_interactions(self):
         self.interactions = []
 
-    def save_point(self, **kwargs) -> None:
+    def save_point(
+            self,
+            time_request_started: datetime,
+            time_elapsed: float,  # seconds
+            method: str,
+            uri: str,
+            endpoint: str = None,  # function name handling the request
+    ) -> None:
         """
         Save a request/response performance information.
 
@@ -72,35 +79,27 @@ class CoreAPM(object):
         the core-level collected performance data (interactions) and call self._save_point().
         """
         self._save_point(
+            time_request_started=time_request_started,
+            time_elapsed=time_elapsed,
+            method=method,
+            uri=uri,
+            endpoint=endpoint,
             interactions=self.interactions,
-            **kwargs,
         )
         # Reset the list of interactions, since it's specific to a request/point
         self.interactions = []
 
     @staticmethod
-    def _save_point(
-            time_request_started: datetime,
-            time_elapsed: float,  # seconds
-            method: str,
-            uri: str,
-            endpoint: str = None,  # function name handling the request
-            interactions: List[Interaction] = None,
-    ) -> None:
+    def _save_point(**kwargs) -> None:
         """ Save a request/response performance information """
 
         interaction_list = []
-        while interactions:  # catches "empty list" and None value
+        interactions = kwargs.get('interactions', [])
+        while interactions:
             interaction_list.append(interactions.pop().serialize())
 
-        item = (
-            time_request_started,
-            time_elapsed,
-            method,
-            uri,
-            endpoint,
-            interaction_list,
-        )
+        # Forward the arguments to the queue
+        item = kwargs
 
         # Capped queue
         pushed = False

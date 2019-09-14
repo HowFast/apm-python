@@ -1,7 +1,7 @@
 import requests
 from logging import getLogger
 from threading import Thread
-from typing import List
+from typing import List, Dict, Any
 
 from queue import Queue, Empty
 from .config import HOWFAST_APM_COLLECTOR_URL
@@ -26,7 +26,7 @@ class Runner(Thread):
     batch_size = 100
 
     # Local list of the points to be sent to the API
-    current_batch: List[tuple]
+    current_batch: List[Dict[str, Any]]
 
     def __init__(self, queue: Queue, app_id: str):
         self.queue = queue

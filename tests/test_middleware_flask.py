@@ -123,8 +123,8 @@ def test_interactions_option(put_mocked, HowFastFlaskMiddleware):
 
     # This assumes that _save_point is static and is not responsible for emptying the list of
     # interactions...
-    assert len(middleware.interactions
-              ) == 0, "after the point is saved, the interaction list should be empty for the next point"
+    assert len(middleware.interactions) == 0, \
+        "after the point is saved, the interaction list should be empty for the next point"
 
     point = middleware._save_point.call_args[1]
     assert len(point.get('interactions')) == 1
