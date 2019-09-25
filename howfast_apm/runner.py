@@ -66,7 +66,7 @@ class Runner(Thread):
 
         if self.current_batch:
             # If the queue was empty, the current batch will be empty and we don't need to send the batch
-            self.send_batch()
+            self._send_batch_robust()
 
         # Exit now if should stop
         if self.stop:
@@ -84,9 +84,36 @@ class Runner(Thread):
             point['interactions'],
         )
 
-    def send_batch(self):
+    def _send_batch_robust(self, attempts=1, max_attempts=3) -> None:
+        """ Retry sending the batch up to max_retry times """
+        try:
+            self.send_batch()
+        except Exception:
+            # Print an error, and don't die
+            logger.error(
+                "Runner was unable to send performance data (try %d/%d)",
+                attempts,
+                max_attempts,
+                exc_info=True,
+            )
+            if attempts < max_attempts:
+                # Retry sending the batch
+                self._send_batch_robust(
+                    attempts=attempts + 1, max_attempts=max_attempts)
+            else:
+                # We've retried enough times, let's just drop the batch :(
+                logger.warning(
+                    "Unable to send the batch after %d attemps, dropping %d points",
+                    max_attempts,
+                    len(self.current_batch),
+                )
+                # Drop the points
+                self.current_batch = []
+
+    def send_batch(self) -> None:
         """ Process one performance point """
-        logger.debug("Posting %d point(s) to the server", len(self.current_batch))
+        logger.debug("Posting %d point(s) to the server",
+                     len(self.current_batch))
         response = requests.post(
             HOWFAST_APM_COLLECTOR_URL,
             json={

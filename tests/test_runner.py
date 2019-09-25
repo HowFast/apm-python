@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from howfast_apm.runner import Runner
 
@@ -61,6 +61,22 @@ def test_queue_full(send_mocked, queue_full):
     runner.run_once()
     assert len(runner.current_batch) == 5
     assert queue_full.qsize() == 0
+
+
+@patch.object(Runner, 'send_batch')
+def test_runner_robustness(send_mocked, queue, example_queue_item):
+    """ The Runner should not die after an exception """
+    send_mocked.side_effect = Exception('Random error when sending the batch')
+    runner = Runner(queue=queue, app_id="test")
+    queue.put_nowait(example_queue_item)
+    assert queue.qsize() == 1
+    # This should not die
+    runner.run_once()
+    assert send_mocked.called is True
+    # Items should have been dropped
+    assert queue.qsize() == 0
+    # send_batch should have been called three times (3 attempts) before dropping the points
+    assert send_mocked.call_count == 3
 
 
 @patch('requests.post')
