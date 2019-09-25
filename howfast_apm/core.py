@@ -5,7 +5,8 @@ from datetime import datetime
 from queue import Full, Empty
 
 from .config import HOWFAST_APM_RECORD_INTERACTIONS
-from .queue import queue, Runner
+from .queue import queue
+from .runner import Runner
 from .hook_requests import install_hooks, Interaction
 
 logger = logging.getLogger('howfast_apm')
