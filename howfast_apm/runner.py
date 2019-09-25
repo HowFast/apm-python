@@ -99,7 +99,9 @@ class Runner(Thread):
             if attempts < max_attempts:
                 # Retry sending the batch
                 self._send_batch_robust(
-                    attempts=attempts + 1, max_attempts=max_attempts)
+                    attempts=attempts + 1,
+                    max_attempts=max_attempts,
+                )
             else:
                 # We've retried enough times, let's just drop the batch :(
                 logger.warning(
