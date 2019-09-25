@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from howfast_apm.queue import Runner
+from howfast_apm.runner import Runner
 
 
 @patch.object(Runner, 'send_batch')

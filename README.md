@@ -34,6 +34,9 @@ poetry publish
 ## Test
 
 ```bash
+# Lint the code
+poetry run flake8 howfast_apm
+
 # Running the tests
 poetry run pytest
 
