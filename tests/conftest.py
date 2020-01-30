@@ -26,22 +26,22 @@ def example_queue_items_gen():
     """ Returns a generator with a sequence of points """
 
     def generator():
-        id = 1
+        request_id = 1
         while True:
             yield {
                 'time_request_started': datetime.now(timezone.utc),
                 'time_elapsed': 0.04,
                 'method': 'PUT',
-                'uri': f'/call/{id}',
+                'uri': f'/call/{request_id}',
                 'endpoint': 'controllers.endpoint_name',
-                'interactions': [Interaction('request', f'https://www.example.org/req{id}', 0.02)],
+                'interactions': [Interaction('request', f'https://www.example.org/req{request_id}', 0.02)],
             }
             # Alternate between an endpoint or no endpoint
             yield {
                 'time_request_started': datetime.now(timezone.utc),
                 'time_elapsed': 0.04,
                 'method': 'GET',
-                'uri': f'/call/{id}',
+                'uri': f'/call/{request_id}',
                 'endpoint': None,
                 'interactions': [],
             }

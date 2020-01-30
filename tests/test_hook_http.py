@@ -16,7 +16,7 @@ def test_hook_requests_get(post_mocked, get_mocked):
     assert get_mocked.called is True
 
     interaction = apm.interactions[0]
-    assert interaction.type == 'request'
+    assert interaction.interaction_type == 'request'
     assert interaction.name == 'some-url'
     assert interaction.extra.get('method') == 'get'
     assert isinstance(interaction.elapsed, float)
@@ -27,7 +27,7 @@ def test_hook_requests_get(post_mocked, get_mocked):
     requests.post('https://example.org/')
     assert len(apm.interactions) == 2
     interaction = apm.interactions[1]
-    assert interaction.type == 'request'
+    assert interaction.interaction_type == 'request'
     assert interaction.name == 'https://example.org/'
     assert interaction.extra.get('method') == 'post'
 
@@ -35,7 +35,7 @@ def test_hook_requests_get(post_mocked, get_mocked):
     requests.get(url='https://example2.org/')
     assert len(apm.interactions) == 3
     interaction = apm.interactions[2]
-    assert interaction.type == 'request'
+    assert interaction.interaction_type == 'request'
     assert interaction.name == 'https://example2.org/'
     assert interaction.extra.get('method') == 'get'
 
@@ -73,7 +73,7 @@ def test_requests_request(request_mocked):
     assert request_mocked.called is True
 
     interaction = apm.interactions[0]
-    assert interaction.type == 'request'
+    assert interaction.interaction_type == 'request'
     assert interaction.name == url
     assert interaction.extra.get('method') == 'get'
 
