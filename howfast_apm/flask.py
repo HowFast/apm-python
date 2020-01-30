@@ -54,6 +54,7 @@ class HowFastFlaskMiddleware(CoreAPM):
     def __call__(self, environ, start_response):
         if not self.app_id:
             # HF APM not configured, return early to save some time
+            # TODO: wouldn't it be better to just not replace the WSGI app?
             return self.wsgi_app(environ, start_response)
 
         uri = environ.get('PATH_INFO')
@@ -64,9 +65,17 @@ class HowFastFlaskMiddleware(CoreAPM):
 
         method = environ.get('REQUEST_METHOD')
 
+        response_status: str = None
+
+        def _start_response_wrapped(status, *args, **kwargs):
+            nonlocal response_status
+            # We wrap the start_response callback to access the response status line (eg "200 OK")
+            response_status = status
+            return start_response(status, *args, **kwargs)
+
         time_request_started = datetime.now(timezone.utc)
         start = timer()
-        return_value = self.wsgi_app(environ, start_response)
+        return_value = self.wsgi_app(environ, _start_response_wrapped)
         end = timer()
         elapsed = end - start
 
@@ -76,6 +85,7 @@ class HowFastFlaskMiddleware(CoreAPM):
             method=method,
             uri=uri,
             endpoint=self.current_endpoint,
+            response_status=response_status,
         )
         self.current_endpoint = None
         # TODO: remove this once overhead has been measured in production

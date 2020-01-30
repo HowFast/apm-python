@@ -74,6 +74,7 @@ class CoreAPM:
             method: str,
             uri: str,
             endpoint: str = None,  # function name handling the request
+            response_status: str = None,  # HTTP response status (200 OK, etc)
     ) -> None:
         """
         Save a request/response performance information.
@@ -88,9 +89,10 @@ class CoreAPM:
             uri=uri,
             endpoint=endpoint,
             interactions=self.interactions,
+            response_status=response_status,
         )
         # Reset the list of interactions, since it's specific to a request/point
-        self.interactions = []
+        self.reset_interactions()
 
     @staticmethod
     def _save_point(**kwargs) -> None:
