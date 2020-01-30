@@ -7,7 +7,7 @@ from timeit import default_timer as timer
 logger = logging.getLogger('howfast_apm')
 
 
-class Interaction(object):
+class Interaction:
     """ An external interaction with other services """
     # Can be "request"
     type: str

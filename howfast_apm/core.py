@@ -12,7 +12,7 @@ from .hook_requests import install_hooks, Interaction
 logger = logging.getLogger('howfast_apm')
 
 
-class CoreAPM(object):
+class CoreAPM:
     """
     Base class that provides the shared code for:
     * starting the background thread
