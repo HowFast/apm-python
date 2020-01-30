@@ -22,6 +22,8 @@ class CoreAPM:
 
     app_id: Optional[str]
 
+    runner: Optional[Runner]
+
     record_interactions: bool
     interactions: List[Interaction] = []
 

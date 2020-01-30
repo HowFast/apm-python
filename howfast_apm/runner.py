@@ -48,7 +48,7 @@ class Runner(Thread):
 
     def run_once(self):
         try:
-            for i in range(self.batch_size):
+            for _ in range(self.batch_size):
                 # Try to get N=100 points from the queue. As soon as the queue is empty, queue.get
                 # will block up to self.sleep_delay (0.5s). Once the queue is empty after the sleep
                 # delay OR 10 points have been retrieved from the queue, we proceed to sending the

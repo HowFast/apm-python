@@ -57,6 +57,6 @@ def queue() -> Queue:
 @pytest.fixture
 def queue_full(example_queue_items_gen) -> Queue:
     queue = Queue(maxsize=10)
-    for i in range(10):
+    for _ in range(10):
         queue.put_nowait(next(example_queue_items_gen))
     return queue
