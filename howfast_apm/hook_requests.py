@@ -7,17 +7,17 @@ from timeit import default_timer as timer
 logger = logging.getLogger('howfast_apm')
 
 
-class Interaction(object):
+class Interaction:
     """ An external interaction with other services """
     # Can be "request"
-    type: str
-    # Name holds the URL if type is "request"
+    interaction_type: str
+    # Name holds the URL if interaction_type is "request"
     name: str
     elapsed: float
     extra: dict
 
-    def __init__(self, type, name, elapsed, extra=None):
-        self.type = type
+    def __init__(self, interaction_type, name, elapsed, extra=None):
+        self.interaction_type = interaction_type
         self.name = name
         self.elapsed = elapsed
         self.extra = extra or {}
@@ -25,7 +25,7 @@ class Interaction(object):
     def serialize(self):
         """ JSON-serialize the Interaction """
         return {
-            "type": self.type,
+            "interaction_type": self.interaction_type,
             "name": self.name,
             "elapsed": self.elapsed,
             "extra": self.extra,
@@ -58,7 +58,7 @@ def install_hooks(record_interaction: Callable[[Interaction], Any]) -> None:
 
                 record_interaction(
                     Interaction(
-                        type="request",
+                        interaction_type="request",
                         name=name,
                         elapsed=elapsed,
                         extra={'method': method.lower()},

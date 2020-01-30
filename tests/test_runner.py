@@ -1,4 +1,4 @@
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 from howfast_apm.runner import Runner
 
@@ -103,7 +103,7 @@ def test_send_batch(mocked_post, queue_full):
     assert method == 'PUT'
     assert uri == '/call/1'
     assert len(interactions) == 1
-    assert interactions[0].type == 'request'
+    assert interactions[0].interaction_type == 'request'
     assert interactions[0].name == 'https://www.example.org/req1'
 
 
