@@ -32,7 +32,7 @@ class Runner(Thread):
         # TODO: stop mechanism?
         self.stop = False
         logger.debug("APM thread starting...")
-        return super(Runner, self).__init__(
+        super(Runner, self).__init__(
             name="HowFast APM",
             # The entire Python program exits when no alive non-daemon threads are left, and we
             # don't want this thread to block the program from exiting.
@@ -114,8 +114,7 @@ class Runner(Thread):
 
     def send_batch(self) -> None:
         """ Process one performance point """
-        logger.debug("Posting %d point(s) to the server",
-                     len(self.current_batch))
+        logger.debug("Posting %d point(s) to the server", len(self.current_batch))
         response = requests.post(
             HOWFAST_APM_COLLECTOR_URL,
             json={
