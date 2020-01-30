@@ -21,7 +21,7 @@ jobs:
 
       - run:
           name: lint code
-          command: poetry run flake8 howfast_apm
+          command: poetry run flake8 howfast_apm tests
 
       - run:
           name: run tests
