@@ -74,22 +74,33 @@ class HowFastFlaskMiddleware(CoreAPM):
             return start_response(status, *args, **kwargs)
 
         time_request_started = datetime.now(timezone.utc)
-        start = timer()
-        return_value = self.wsgi_app(environ, _start_response_wrapped)
-        end = timer()
-        elapsed = end - start
 
-        self.save_point(
-            time_request_started=time_request_started,
-            time_elapsed=elapsed,
-            method=method,
-            uri=uri,
-            endpoint=self.current_endpoint,
-            response_status=response_status,
-        )
-        self.current_endpoint = None
-        # TODO: remove this once overhead has been measured in production
-        logger.info("overhead when saving the point: %.3fms", (timer() - end) * 1000)
+        try:
+            # Time the function execution
+            start = timer()
+            return_value = self.wsgi_app(environ, _start_response_wrapped)
+            end = timer()
+        except Exception:
+            # The WSGI app raised an exception, let's still save the point before raising the
+            # exception again
+            end = timer()
+            response_status = "500 INTERNAL SERVER ERROR"
+            raise
+        finally:
+            elapsed = end - start
+
+            self.save_point(
+                time_request_started=time_request_started,
+                time_elapsed=elapsed,
+                method=method,
+                uri=uri,
+                endpoint=self.current_endpoint,
+                response_status=response_status,
+            )
+            self.current_endpoint = None
+            # TODO: remove this once overhead has been measured in production
+            logger.info("overhead when saving the point: %.3fms", (timer() - end) * 1000)
+
         return return_value
 
     def _request_started(self, sender, **kwargs):
