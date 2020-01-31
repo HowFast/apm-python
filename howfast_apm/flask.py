@@ -4,8 +4,6 @@ from datetime import datetime, timezone
 from timeit import default_timer as timer
 from flask.signals import request_started
 from flask import Flask, request
-import re
-import fnmatch
 
 from .core import CoreAPM
 from .utils import is_in_blacklist, convert_endpoints
