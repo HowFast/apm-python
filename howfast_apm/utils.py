@@ -5,6 +5,7 @@ from typing import List
 
 
 def convert_endpoints(*blacklist):
+    """Compiles a list endpoints to a list of regexes"""
     return [re.compile(fnmatch.translate(x)) for x in blacklist]
 
 
