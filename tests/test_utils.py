@@ -3,14 +3,16 @@ from howfast_apm import utils
 
 def test_is_blacklist_exact():
     """ The blacklist util should support exact strings matching """
-    assert utils.is_in_blacklist('/some-real-uri/', ['/exact-uri/']) is False
-    assert utils.is_in_blacklist('/exact-uri/', ['/exact-uri/']) is True
-    assert utils.is_in_blacklist('/exact-uri/with-subpath', ['/exact-uri/']) is False
+    blacklist = ['/exact-uri/']
+    assert utils.is_in_blacklist('/some-real-uri/', blacklist) is False
+    assert utils.is_in_blacklist('/exact-uri/', blacklist) is True
+    assert utils.is_in_blacklist('/exact-uri/with-subpath', blacklist) is False
 
     # With multiple patterns
-    assert utils.is_in_blacklist('/exact-uri-1/', ['/exact-uri-1/', '/exact-uri-2/']) is True
-    assert utils.is_in_blacklist('/exact-uri-2/', ['/exact-uri-1/', '/exact-uri-2/']) is True
-    assert utils.is_in_blacklist('/exact-uri-3/', ['/exact-uri-1/', '/exact-uri-2/']) is False
+    multiple_blacklist = ['/exact-uri-1/', '/exact-uri-2/']
+    assert utils.is_in_blacklist('/exact-uri-1/', multiple_blacklist) is True
+    assert utils.is_in_blacklist('/exact-uri-2/', multiple_blacklist) is True
+    assert utils.is_in_blacklist('/exact-uri-3/', multiple_blacklist) is False
 
 
 def test_is_blacklist_glob():
