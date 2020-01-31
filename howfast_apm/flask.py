@@ -4,9 +4,11 @@ from datetime import datetime, timezone
 from timeit import default_timer as timer
 from flask.signals import request_started
 from flask import Flask, request
+import re
+import fnmatch
 
 from .core import CoreAPM
-from .utils import is_in_blacklist
+from .utils import is_in_blacklist, convert_endpoints
 
 logger = logging.getLogger('howfast_apm')
 
@@ -42,7 +44,7 @@ class HowFastFlaskMiddleware(CoreAPM):
         app.wsgi_app = self
 
         if endpoints_blacklist:
-            self.endpoints_blacklist = endpoints_blacklist
+            self.endpoints_blacklist = convert_endpoints(*endpoints_blacklist)
         else:
             self.endpoints_blacklist = []
 
