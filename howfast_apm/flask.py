@@ -54,6 +54,7 @@ class HowFastFlaskMiddleware(CoreAPM):
     def __call__(self, environ, start_response):
         if not self.app_id:
             # HF APM not configured, return early to save some time
+            # TODO: wouldn't it be better to just not replace the WSGI app?
             return self.wsgi_app(environ, start_response)
 
         uri = environ.get('PATH_INFO')
@@ -64,22 +65,46 @@ class HowFastFlaskMiddleware(CoreAPM):
 
         method = environ.get('REQUEST_METHOD')
 
-        time_request_started = datetime.now(timezone.utc)
-        start = timer()
-        return_value = self.wsgi_app(environ, start_response)
-        end = timer()
-        elapsed = end - start
+        response_status: str = None
 
-        self.save_point(
-            time_request_started=time_request_started,
-            time_elapsed=elapsed,
-            method=method,
-            uri=uri,
-            endpoint=self.current_endpoint,
-        )
-        self.current_endpoint = None
-        # TODO: remove this once overhead has been measured in production
-        logger.info("overhead when saving the point: %.3fms", (timer() - end) * 1000)
+        def _start_response_wrapped(status, *args, **kwargs):
+            nonlocal response_status
+            # We wrap the start_response callback to access the response status line (eg "200 OK")
+            response_status = status
+            return start_response(status, *args, **kwargs)
+
+        time_request_started = datetime.now(timezone.utc)
+
+        try:
+            # Time the function execution
+            start = timer()
+            return_value = self.wsgi_app(environ, _start_response_wrapped)
+            # Stop the timer as soon as possible to get the best measure of the function's execution time
+            end = timer()
+        except Exception:
+            # The WSGI app raised an exception, let's still save the point before raising the
+            # exception again
+            # First, "stop" the timer now to get the good measure of the function's execution time
+            end = timer()
+            # The real response status will actually be set by the server that interacts with the
+            # WSGI app, but we cannot instrument it from here, so we just assume a common string.
+            response_status = "500 INTERNAL SERVER ERROR"
+            raise
+        finally:
+            elapsed = end - start
+
+            self.save_point(
+                time_request_started=time_request_started,
+                time_elapsed=elapsed,
+                method=method,
+                uri=uri,
+                endpoint=self.current_endpoint,
+                response_status=response_status,
+            )
+            self.current_endpoint = None
+            # TODO: remove this once overhead has been measured in production
+            logger.info("overhead when saving the point: %.3fms", (timer() - end) * 1000)
+
         return return_value
 
     def _request_started(self, sender, **kwargs):

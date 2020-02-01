@@ -35,12 +35,14 @@ def example_queue_items_gen():
                 'uri': f'/call/{request_id}',
                 'endpoint': 'controllers.endpoint_name',
                 'interactions': [Interaction('request', f'https://www.example.org/req{request_id}', 0.02)],
+                'response_status': '200 OK',
             }
             # Alternate between an endpoint or no endpoint
             yield {
                 'time_request_started': datetime.now(timezone.utc),
                 'time_elapsed': 0.04,
                 'method': 'GET',
+                'response_status': '200 OK',
                 'uri': f'/call/{request_id}',
                 'endpoint': None,
                 'interactions': [],
