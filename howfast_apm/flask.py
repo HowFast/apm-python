@@ -6,7 +6,7 @@ from flask.signals import request_started
 from flask import Flask, request
 
 from .core import CoreAPM
-from .utils import is_in_blacklist, convert_endpoints
+from .utils import is_in_blacklist, compile_endpoints
 
 logger = logging.getLogger('howfast_apm')
 
@@ -42,7 +42,7 @@ class HowFastFlaskMiddleware(CoreAPM):
         app.wsgi_app = self
 
         if endpoints_blacklist:
-            self.endpoints_blacklist = convert_endpoints(*endpoints_blacklist)
+            self.endpoints_blacklist = compile_endpoints(*endpoints_blacklist)
         else:
             self.endpoints_blacklist = []
 
