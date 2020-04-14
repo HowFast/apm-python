@@ -81,7 +81,7 @@ class HowFastFlaskMiddleware(CoreAPM):
             return_value = self.wsgi_app(environ, _start_response_wrapped)
             # Stop the timer as soon as possible to get the best measure of the function's execution time
             end = timer()
-        except Exception:
+        except BaseException:
             # The WSGI app raised an exception, let's still save the point before raising the
             # exception again
             # First, "stop" the timer now to get the good measure of the function's execution time
