@@ -22,9 +22,13 @@ def create_app():
         requests.put('https://does-not-exist/')
         return 'ok'
 
+    @app.route('/exception')
+    def exception():
+        raise Exception("Unhandled exception, kaboom!")
+
     @app.route('/error')
     def error():
-        raise Exception("Unhandled exception, kaboom!")
+        raise SystemExit()
 
     return app
 
@@ -79,6 +83,23 @@ def test_ok_with_dsn(HowFastFlaskMiddleware):
 
 def test_with_exception(HowFastFlaskMiddleware):
     """ The middleware should gracefully handle routes that raise an Exception """
+    app = create_app()
+    middleware = HowFastFlaskMiddleware(app, app_id='some-dsn')
+
+    tester = app.test_client()
+    response = tester.get('/exception')
+    assert response.status_code == 500
+    assert middleware._save_point.called is True
+    assert middleware._save_point.call_count == 1
+    point = middleware._save_point.call_args[1]
+    assert point.get('time_elapsed') > 0
+    assert point.get('time_request_started') < datetime.now(timezone.utc)
+    assert point.get('method') == "GET"
+    assert point.get('response_status') == "500 INTERNAL SERVER ERROR"
+    assert point.get('uri') == "/exception"
+
+def test_with_error(HowFastFlaskMiddleware):
+    """ The middleware should gracefully handle routes that raise an Error """
     app = create_app()
     middleware = HowFastFlaskMiddleware(app, app_id='some-dsn')
 
