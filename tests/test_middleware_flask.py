@@ -104,8 +104,10 @@ def test_with_error(HowFastFlaskMiddleware):
     middleware = HowFastFlaskMiddleware(app, app_id='some-dsn')
 
     tester = app.test_client()
-    response = tester.get('/error')
-    assert response.status_code == 500
+    with pytest.raises(SystemExit):
+        # Flask will propagate the SystemExit instead of catching it
+        tester.get('/error')
+    # However, the failure should still be logged by the middleware
     assert middleware._save_point.called is True
     assert middleware._save_point.call_count == 1
     point = middleware._save_point.call_args[1]
