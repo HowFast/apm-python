@@ -98,6 +98,7 @@ def test_with_exception(HowFastFlaskMiddleware):
     assert point.get('response_status') == "500 INTERNAL SERVER ERROR"
     assert point.get('uri') == "/exception"
 
+
 def test_with_error(HowFastFlaskMiddleware):
     """ The middleware should gracefully handle routes that raise an Error """
     app = create_app()
