@@ -83,13 +83,11 @@ class Runner(Thread):
             'interactions': point['interactions'],
             'response_status': point['response_status'],
             'endpoint_name': point['endpoint_name'],
-            'url_rule': point['url_rule'],
-            'is_not_found': point['is_not_found'],
         }
         # Save some space in the request body if we don't have interesting information
-        if point['url_rule']:
+        if 'url_rule' in point and point['url_rule']:
             serialized_point['url_rule'] = point['url_rule']
-        if point['is_not_found']:
+        if 'is_not_found' in point and point['is_not_found'] is not None:
             serialized_point['is_not_found'] = point['is_not_found']
 
         return serialized_point

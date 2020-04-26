@@ -16,7 +16,7 @@ def example_queue_item():
         'time_elapsed': 0.04,
         'method': 'PUT',
         'uri': '/look/here',
-        'endpoint': 'controllers.endpoint_name',
+        'endpoint_name': 'controllers.endpoint_name',
         'interactions': interactions,
     }
 
@@ -33,7 +33,7 @@ def example_queue_items_gen():
                 'time_elapsed': 0.04,
                 'method': 'PUT',
                 'uri': f'/call/{request_id}',
-                'endpoint': 'controllers.endpoint_name',
+                'endpoint_name': 'controllers.endpoint_name',
                 'interactions': [Interaction('request', f'https://www.example.org/req{request_id}', 0.02)],
                 'response_status': '200 OK',
             }
@@ -44,7 +44,7 @@ def example_queue_items_gen():
                 'method': 'GET',
                 'response_status': '200 OK',
                 'uri': f'/call/{request_id}',
-                'endpoint': None,
+                'endpoint_name': None,
                 'interactions': [],
             }
 

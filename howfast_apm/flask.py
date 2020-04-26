@@ -126,4 +126,4 @@ class HowFastFlaskMiddleware(CoreAPM):
         # This will yield strings like "/v1.1/apm/<int:apm_id>/endpoint"
         self.local.url_rule = request.url_rule.rule if request.url_rule is not None else None
         # We want to tell the difference between a "real" 404 and a 404 returned by an existing view
-        self.is_not_found = isinstance(request.routing_exception, exceptions.NotFound)
+        self.local.is_not_found = isinstance(request.routing_exception, exceptions.NotFound)

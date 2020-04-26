@@ -30,6 +30,13 @@ def create_app():
     def error():
         raise SystemExit()
 
+    @app.route('/record/<int:id>')
+    def record(id):
+        if id <= 42:
+            return 'ok'
+        # Return a 404 status code
+        return 'not found', 404
+
     return app
 
 
@@ -129,7 +136,35 @@ def test_with_path_parameter(HowFastFlaskMiddleware):
     assert response.status_code == 200
     assert middleware._save_point.call_count == 1
     point = middleware._save_point.call_args[1]
-    assert point.get('endpoint') == "names"
+    assert point.get('endpoint_name') == "names"
+    assert point.get('url_rule') == "/name/<string:name>"
+
+
+def test_not_found(HowFastFlaskMiddleware):
+    """ Requests with no matching route should have their is_not_found flag set to true """
+    app = create_app()
+    middleware = HowFastFlaskMiddleware(app, app_id='some-dsn')
+
+    tester = app.test_client()
+    response = tester.get('/record/12')
+    assert response.status_code == 200
+    assert middleware._save_point.call_count == 1
+    point = middleware._save_point.call_args[1]
+    assert point.get('is_not_found') is False
+    middleware._save_point.reset_mock()
+
+    response = tester.get('/record/100')
+    assert response.status_code == 404
+    assert middleware._save_point.call_count == 1
+    point = middleware._save_point.call_args[1]
+    assert point.get('is_not_found') is False
+    middleware._save_point.reset_mock()
+
+    response = tester.get('/does-not-exist')
+    assert response.status_code == 404
+    assert middleware._save_point.call_count == 1
+    point = middleware._save_point.call_args[1]
+    assert point.get('is_not_found') is True
 
 
 def test_blacklist_option(HowFastFlaskMiddleware):
