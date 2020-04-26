@@ -75,15 +75,22 @@ class Runner(Thread):
     @staticmethod
     def serialize_point(point: dict) -> dict:
         """ Prepare the point to be sent to the API """
-        return {
+        serialized_point = {
             'method': point['method'],
             'uri': point['uri'],
             'time_request_started': point['time_request_started'].isoformat(),
             'time_elapsed': point['time_elapsed'],
-            'endpoint': point['endpoint'],
             'interactions': point['interactions'],
             'response_status': point['response_status'],
+            'endpoint_name': point['endpoint_name'],
         }
+        # Save some space in the request body if we don't have interesting information
+        if 'url_rule' in point and point['url_rule']:
+            serialized_point['url_rule'] = point['url_rule']
+        if 'is_not_found' in point and point['is_not_found'] is not None:
+            serialized_point['is_not_found'] = point['is_not_found']
+
+        return serialized_point
 
     def _send_batch_robust(self, attempts=1, max_attempts=3) -> None:
         """ Retry sending the batch up to max_retry times """
