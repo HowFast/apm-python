@@ -48,7 +48,7 @@ class CoreAPM:
             if self.record_interactions:
                 self.setup_hooks()
         else:
-            logger.warning(f"HowFast APM initialized with no DSN, reporting will be disabled.")
+            logger.warning("HowFast APM initialized with no DSN, reporting will be disabled.")
 
     def start_background_thread(self):
         """ Start the thread that will consume points from the queue and send them to the API """

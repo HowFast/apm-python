@@ -31,7 +31,7 @@ def create_app():
         raise SystemExit()
 
     @app.route('/record/<int:id>')
-    def record(id):
+    def records(id):
         if id <= 42:
             return 'ok'
         # Return a 404 status code
