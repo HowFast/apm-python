@@ -1,9 +1,10 @@
 import logging
-from typing import List, Optional
+from typing import List
 from datetime import datetime, timezone
 from timeit import default_timer as timer
 from flask.signals import request_started
 from flask import Flask, request
+from werkzeug import local, exceptions
 
 from .core import CoreAPM
 from .utils import is_in_blacklist, compile_endpoints
@@ -18,10 +19,6 @@ class HowFastFlaskMiddleware(CoreAPM):
     This implementation is purposedly naive and potentially slow, but its goal is to validate the
     PoC. It should be replaced/improved in the future, based on the results of the PoC.
     """
-
-    # TODO: this architecture is very ugly - there must be a better solution
-    # Temporary variable holding the endpoint name between the start and the end of the request
-    current_endpoint: Optional[str]
 
     def __init__(
             self,
@@ -38,8 +35,14 @@ class HowFastFlaskMiddleware(CoreAPM):
 
         self.app = app
         self.wsgi_app = app.wsgi_app
-        # Overwrite the WSGI application
-        app.wsgi_app = self
+
+        # We need to store thread local information, let's use Werkzeug's context locals
+        # (see https://werkzeug.palletsprojects.com/en/1.0.x/local/)
+        self.local = local.Local()
+        self.local_manager = local.LocalManager([self.local])
+
+        # Overwrite the passed WSGI application
+        app.wsgi_app = self.local_manager.make_middleware(self)
 
         if endpoints_blacklist:
             self.endpoints_blacklist = compile_endpoints(*endpoints_blacklist)
@@ -98,10 +101,12 @@ class HowFastFlaskMiddleware(CoreAPM):
                 time_elapsed=elapsed,
                 method=method,
                 uri=uri,
-                endpoint=self.current_endpoint,
                 response_status=response_status,
+                # Request metadata
+                endpoint_name=getattr(self.local, 'endpoint_name', None),
+                url_rule=getattr(self.local, 'url_rule', None),
+                is_not_found=getattr(self.local, 'is_not_found', None),
             )
-            self.current_endpoint = None
             # TODO: remove this once overhead has been measured in production
             logger.info("overhead when saving the point: %.3fms", (timer() - end) * 1000)
 
@@ -109,4 +114,16 @@ class HowFastFlaskMiddleware(CoreAPM):
 
     def _request_started(self, sender, **kwargs):
         with sender.app_context():
-            self.current_endpoint = request.endpoint
+            self._save_request_metadata()
+
+    def _save_request_metadata(self):
+        """ Extract and save request metadata in the context local """
+        # This will yield strings like:
+        # * "monitor" (when the endpoint is defined using a resource)
+        # * "apm-collection.store_points" (when the endpoint is defined with a blueprint)
+        # The endpoint name will always be lowercase
+        self.local.endpoint_name = request.endpoint
+        # This will yield strings like "/v1.1/apm/<int:apm_id>/endpoint"
+        self.local.url_rule = request.url_rule.rule if request.url_rule is not None else None
+        # We want to tell the difference between a "real" 404 and a 404 returned by an existing view
+        self.is_not_found = isinstance(request.routing_exception, exceptions.NotFound)

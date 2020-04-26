@@ -73,8 +73,10 @@ class CoreAPM:
             time_elapsed: float,  # seconds
             method: str,
             uri: str,
-            endpoint: str = None,  # function name handling the request
             response_status: str = None,  # HTTP response status (200 OK, etc)
+            endpoint_name: str = None,  # function name handling the request
+            url_rule: str = None,  # Route pattern matched for this endpoint (/pet/<int:id>)
+            is_not_found: bool = None,  # If the request did not match any route
     ) -> None:
         """
         Save a request/response performance information.
@@ -87,9 +89,11 @@ class CoreAPM:
             time_elapsed=time_elapsed,
             method=method,
             uri=uri,
-            endpoint=endpoint,
             interactions=self.interactions,
             response_status=response_status,
+            endpoint_name=endpoint_name,
+            url_rule=url_rule,
+            is_not_found=is_not_found,
         )
         # Reset the list of interactions, since it's specific to a request/point
         self.reset_interactions()
