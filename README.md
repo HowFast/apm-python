@@ -1,5 +1,6 @@
 # HowFast APM agent for Python
 
+[![PyPI](https://img.shields.io/pypi/v/howfast-apm)](https://pypi.org/project/howfast-apm/)
 [![CircleCI](https://circleci.com/gh/HowFast/apm-python.svg?style=svg)](https://circleci.com/gh/HowFast/apm-python)
 [![uptime](https://badge.howfast.tech/uptime.png?t=https%3A%2F%2Fwww.howfast.tech%2F)](https://www.howfast.tech/#/monitors/https:%2F%2Fwww.howfast.tech%2F?pk_campaign=badge)
 [![Coverage Status](https://coveralls.io/repos/github/HowFast/apm-python/badge.svg?branch=master)](https://coveralls.io/github/HowFast/apm-python?branch=master)
