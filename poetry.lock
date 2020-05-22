@@ -868,11 +868,11 @@ testing = ["jaraco.itertools", "func-timeout"]
 
 [extras]
 flask = ["flask", "blinker", "werkzeug"]
-pytest = []
+pytest = ["flask", "quart"]
 quart = ["quart"]
 
 [metadata]
-content-hash = "bb0f26eaff217d22a64575bb189564a7b949bd55b6f645375ee08de381433fe2"
+content-hash = "f0cba87045cab3d2e6c10c896c8b7823924ce13bb63a1ad0a803f748211abffc"
 python-versions = ">=3.6,<3.9"
 
 [metadata.files]

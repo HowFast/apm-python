@@ -2,7 +2,7 @@ import logging
 from typing import List
 from datetime import datetime, timezone
 from timeit import default_timer as timer
-from quart.signals import request_started
+# from quart.signals import request_started
 from quart import Quart, request
 from werkzeug import local, exceptions
 

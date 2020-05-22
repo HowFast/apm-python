@@ -12,7 +12,7 @@ jobs:
 
       - run:
           name: install dependencies
-          command: poetry install -v -E flask -E quark
+          command: poetry install -v -E pytest
 
       - save_cache:
           key: deps-{{ checksum "poetry.lock" }}
@@ -26,7 +26,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            poetry run coverage run -m pytest .
+            poetry run coverage run -m pytest -vv
             poetry run coveralls
 
   tox:
@@ -37,7 +37,6 @@ jobs:
 
       - restore_cache:
           keys:
-            - deps-{{ checksum "poetry.lock" }}
             - pyenv-{{ checksum ".python-version" }}
 
       - run:
@@ -47,6 +46,10 @@ jobs:
             # ~/.local/bin is already in the path and the bash_profile doesn't get sourced between steps
             mkdir -p ~/.local/bin
             ln -s ~/.pyenv/bin/pyenv ~/.local/bin/
+
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "poetry.lock" }}
 
       - run:
           name: make sure tox is installed
@@ -61,7 +64,6 @@ jobs:
           name: install all Python versions
           command: |
             pyenv versions
-            ls -lh ~/.pyenv/*
             cat .python-version | xargs -x -l1 pyenv install --skip-existing
 
       - save_cache:
