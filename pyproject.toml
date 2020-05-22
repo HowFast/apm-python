@@ -42,6 +42,7 @@ mypy = "^0.720.0"
 coveralls = "^1.8"
 ipdb = "^0.12.2"
 pytest-watch = "^4.2"
+tox-pyenv = "^1.1.0"
 
 [tool.poetry.extras]
 flask = ["flask", "blinker", "werkzeug"]
