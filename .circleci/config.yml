@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  build_test:
     docker:
       - image: circleci/python:3.6.9
     steps:
@@ -12,7 +12,7 @@ jobs:
 
       - run:
           name: install dependencies
-          command: poetry install -v -E flask
+          command: poetry install -v -E flask -E quark
 
       - save_cache:
           key: deps-{{ checksum "poetry.lock" }}
@@ -29,8 +29,50 @@ jobs:
             poetry run coverage run -m pytest .
             poetry run coveralls
 
+  tox:
+    docker:
+      - image: circleci/python:3.6.9
+    steps:
+      - checkout
+
+      - run:
+          name: install pyenv
+          command: |
+            git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+            # ~/.local/bin is already in the path and the bash_profile doesn't get sourced between steps
+            mkdir -p ~/.local/bin
+            ln -s ~/.pyenv/bin/pyenv ~/.local/bin/
+
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "poetry.lock" }}
+            - pyenv-{{ checksum ".python-version" }}
+
+      - run:
+          name: make sure tox is installed
+          command: poetry install -v
+
+      - save_cache:
+          key: deps-{{ checksum "poetry.lock" }}
+          paths:
+            - /home/circleci/.cache/pypoetry/virtualenvs
+
+      - run:
+          name: install all Python versions
+          command: cat .python-version | xargs -x -l1 pyenv install
+
+      - save_cache:
+          key: pyenv-{{ checksum ".python-version" }}
+          paths:
+            - /home/circleci/.pyenv
+
+      - run:
+          name: test across multiple Python / libraries versions
+          command: poetry run tox -vv
+
 workflows:
   version: 2
   build:
     jobs:
-      - build
+      - build_test
+      - tox
