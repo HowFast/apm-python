@@ -48,7 +48,8 @@ tox-pyenv = "^1.1.0"
 [tool.poetry.extras]
 flask = ["flask", "blinker", "werkzeug"]
 quart = ["quart"]
-pytest = ["pytest", "pytest-asyncio"]
+# To run the tests, we need to install the tested frameworks
+pytest = ["pytest", "pytest-asyncio", "flask", "quart"]
 
 [build-system]
 requires = ["poetry>=0.12"]

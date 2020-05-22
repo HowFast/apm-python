@@ -38,12 +38,14 @@ poetry publish
 # Lint the code
 poetry run flake8 howfast_apm
 
-# Running the tests
+# Run the tests
 poetry run pytest
 
-# Running the tests across a matrix of Python versions and Flask versions
-pip install tox tox-pyenv
-tox
+# Run the tests across a matrix of Python versions and Flask versions
+# make sure all the relevant Python versions are available locally
+cat .python-version | xargs -x -l1 pyenv install --skip-existing
+# run the tests on the selected versions
+poetry run tox
 ```
 
 ## Publish

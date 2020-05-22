@@ -59,7 +59,10 @@ jobs:
 
       - run:
           name: install all Python versions
-          command: cat .python-version | xargs -x -l1 pyenv install --skip-existing
+          command: |
+            pyenv versions
+            ls -lh ~/.pyenv/*
+            cat .python-version | xargs -x -l1 pyenv install --skip-existing
 
       - save_cache:
           key: pyenv-{{ checksum ".python-version" }}
