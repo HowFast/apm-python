@@ -35,18 +35,18 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: install pyenv
-          command: |
-            git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-            # ~/.local/bin is already in the path and the bash_profile doesn't get sourced between steps
-            mkdir -p ~/.local/bin
-            ln -s ~/.pyenv/bin/pyenv ~/.local/bin/
-
       - restore_cache:
           keys:
             - deps-{{ checksum "poetry.lock" }}
             - pyenv-{{ checksum ".python-version" }}
+
+      - run:
+          name: install pyenv
+          command: |
+            git clone https://github.com/pyenv/pyenv.git ~/.pyenv || (cd ~/.pyenv && git pull)
+            # ~/.local/bin is already in the path and the bash_profile doesn't get sourced between steps
+            mkdir -p ~/.local/bin
+            ln -s ~/.pyenv/bin/pyenv ~/.local/bin/
 
       - run:
           name: make sure tox is installed
