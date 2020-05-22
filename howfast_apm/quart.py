@@ -2,8 +2,8 @@ import logging
 from typing import List
 from datetime import datetime, timezone
 from timeit import default_timer as timer
-from flask.signals import request_started
-from flask import Flask, request
+from quart.signals import request_started
+from quart import Quart, request
 from werkzeug import local, exceptions
 
 from .core import CoreAPM
@@ -12,15 +12,15 @@ from .utils import is_in_blacklist, compile_endpoints
 logger = logging.getLogger('howfast_apm')
 
 
-class HowFastFlaskMiddleware(CoreAPM):
+class HowFastQuartMiddleware(CoreAPM):
     """
-    Flask middleware to measure how much time is spent per endpoint.
+    Quart middleware to measure how much time is spent per endpoint.
     """
 
     def __init__(
             self,
             # The Flask application to analyze
-            app: Flask,
+            app: Quart,
             # The HowFast app ID to use
             app_id: str = None,
             # Endpoints not to monitor
@@ -31,7 +31,7 @@ class HowFastFlaskMiddleware(CoreAPM):
         super().__init__(**kwargs)
 
         self.app = app
-        self.wsgi_app = app.wsgi_app
+        self.asgi_app = app.asgi_app
 
         # We need to store thread local information, let's use Werkzeug's context locals
         # (see https://werkzeug.palletsprojects.com/en/1.0.x/local/)
@@ -39,7 +39,7 @@ class HowFastFlaskMiddleware(CoreAPM):
         self.local_manager = local.LocalManager([self.local])
 
         # Overwrite the passed WSGI application
-        app.wsgi_app = self.local_manager.make_middleware(self)
+        app.asgi_app = self.local_manager.make_middleware(self)
 
         if endpoints_blacklist:
             self.endpoints_blacklist = compile_endpoints(*endpoints_blacklist)
@@ -49,19 +49,19 @@ class HowFastFlaskMiddleware(CoreAPM):
         # Setup the queue and the background thread
         self.setup(app_id)
 
-        request_started.connect(self._request_started)
+        # request_started.connect(self._request_started)
 
     def __call__(self, environ, start_response):
         if not self.app_id:
             # HF APM not configured, return early to save some time
             # TODO: wouldn't it be better to just not replace the WSGI app?
-            return self.wsgi_app(environ, start_response)
+            return self.asgi_app(environ, start_response)
 
         uri = environ.get('PATH_INFO')
 
         if is_in_blacklist(uri, self.endpoints_blacklist):
             # Endpoint blacklist, return now
-            return self.wsgi_app(environ, start_response)
+            return self.asgi_app(environ, start_response)
 
         method = environ.get('REQUEST_METHOD')
 
@@ -78,7 +78,7 @@ class HowFastFlaskMiddleware(CoreAPM):
         try:
             # Time the function execution
             start = timer()
-            return_value = self.wsgi_app(environ, _start_response_wrapped)
+            return_value = self.asgi_app(environ, _start_response_wrapped)
             # Stop the timer as soon as possible to get the best measure of the function's execution time
             end = timer()
         except BaseException:
