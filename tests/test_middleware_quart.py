@@ -1,7 +1,11 @@
 import pytest
 import requests
 
-from quart import Quart
+try:
+    from quart import Quart
+except ModuleNotFoundError:
+    pytest.skip("Quart is not installed, skipping quart-only tests", allow_module_level=True)
+
 from unittest.mock import MagicMock, patch
 from datetime import datetime, timezone
 

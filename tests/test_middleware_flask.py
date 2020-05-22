@@ -1,7 +1,11 @@
 import pytest
 import requests
 
-from flask import Flask
+try:
+    from flask import Flask
+except ModuleNotFoundError:
+    pytest.skip("Flask is not installed, skipping flask-only tests", allow_module_level=True)
+
 from unittest.mock import MagicMock, patch
 from datetime import datetime, timezone
 
