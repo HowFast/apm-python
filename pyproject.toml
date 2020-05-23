@@ -26,7 +26,7 @@ classifiers=[
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.6,<3.9"
+python = "^3.6"
 requests = "^2.22"
 flask = {version = ">=0.8", optional = true}
 werkzeug = {version = ">=0.7", optional = true}

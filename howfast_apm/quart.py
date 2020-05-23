@@ -2,9 +2,7 @@ import logging
 from typing import List
 from datetime import datetime, timezone
 from timeit import default_timer as timer
-# from quart.signals import request_started
-from quart import Quart, request
-from werkzeug import local, exceptions
+from quart import Quart
 
 from .core import CoreAPM
 from .utils import is_in_blacklist, compile_endpoints
@@ -33,13 +31,8 @@ class HowFastQuartMiddleware(CoreAPM):
         self.app = app
         self.asgi_app = app.asgi_app
 
-        # We need to store thread local information, let's use Werkzeug's context locals
-        # (see https://werkzeug.palletsprojects.com/en/1.0.x/local/)
-        self.local = local.Local()
-        self.local_manager = local.LocalManager([self.local])
-
-        # Overwrite the passed WSGI application
-        app.asgi_app = self.local_manager.make_middleware(self)
+        # Overwrite the passed ASGI application
+        app.asgi_app = self
 
         if endpoints_blacklist:
             self.endpoints_blacklist = compile_endpoints(*endpoints_blacklist)
@@ -49,78 +42,60 @@ class HowFastQuartMiddleware(CoreAPM):
         # Setup the queue and the background thread
         self.setup(app_id)
 
-        # request_started.connect(self._request_started)
-
-    def __call__(self, environ, start_response):
+    async def __call__(self, scope, receive, send):
         if not self.app_id:
             # HF APM not configured, return early to save some time
-            # TODO: wouldn't it be better to just not replace the WSGI app?
-            return self.asgi_app(environ, start_response)
+            # TODO: wouldn't it be better to just not replace the ASGI app?
+            return await self.asgi_app(scope, receive, send)
 
-        uri = environ.get('PATH_INFO')
+        if scope.get('type') != "http":
+            # Other protocols
+            # - "lifespan" is not relevant (startup/shutdown of ASGI, see
+            #   https://asgi.readthedocs.io/en/latest/specs/lifespan.html)
+            # - "websocket" is not supported (see
+            #   https://asgi.readthedocs.io/en/latest/specs/www.html#websocket)
+            return await self.asgi_app(scope, receive, send)
+
+        # https://asgi.readthedocs.io/en/latest/specs/www.html#connection-scope
+
+        uri = scope.get('path')
 
         if is_in_blacklist(uri, self.endpoints_blacklist):
             # Endpoint blacklist, return now
-            return self.asgi_app(environ, start_response)
+            return await self.asgi_app(scope, receive, send)
 
-        method = environ.get('REQUEST_METHOD')
+        instance = {'response_status': None}
 
-        response_status: str = None
+        def _send_wrapped(response):
+            if response['type'] == 'http.response.start':
+                instance['response_status'] = response['status']
+            return send(response)
 
-        def _start_response_wrapped(status, *args, **kwargs):
-            nonlocal response_status
-            # We wrap the start_response callback to access the response status line (eg "200 OK")
-            response_status = status
-            return start_response(status, *args, **kwargs)
+        method = scope.get('method')
 
         time_request_started = datetime.now(timezone.utc)
-
         try:
             # Time the function execution
             start = timer()
-            return_value = self.asgi_app(environ, _start_response_wrapped)
+            response = await self.asgi_app(scope, receive, _send_wrapped)
             # Stop the timer as soon as possible to get the best measure of the function's execution time
             end = timer()
         except BaseException:
-            # The WSGI app raised an exception, let's still save the point before raising the
-            # exception again
-            # First, "stop" the timer now to get the good measure of the function's execution time
-            end = timer()
-            # The real response status will actually be set by the server that interacts with the
-            # WSGI app, but we cannot instrument it from here, so we just assume a common string.
-            response_status = "500 INTERNAL SERVER ERROR"
+            instance['response_status'] = 500
             raise
         finally:
             elapsed = end - start
-
             self.save_point(
                 time_request_started=time_request_started,
                 time_elapsed=elapsed,
                 method=method,
                 uri=uri,
-                response_status=response_status,
-                # Request metadata
-                endpoint_name=getattr(self.local, 'endpoint_name', None),
-                url_rule=getattr(self.local, 'url_rule', None),
-                is_not_found=getattr(self.local, 'is_not_found', None),
+                response_status=str(instance['response_status']),
+                # Metadata
+                # TODO: extract endpoint name / URL rule
+                endpoint_name=uri,
+                # url_rule="",
+                # is_not_found="",
             )
-            # TODO: remove this once overhead has been measured in production
-            logger.info("overhead when saving the point: %.3fms", (timer() - end) * 1000)
 
-        return return_value
-
-    def _request_started(self, sender, **kwargs):
-        with sender.app_context():
-            self._save_request_metadata()
-
-    def _save_request_metadata(self):
-        """ Extract and save request metadata in the context local """
-        # This will yield strings like:
-        # * "monitor" (when the endpoint is defined using a resource)
-        # * "apm-collection.store_points" (when the endpoint is defined with a blueprint)
-        # The endpoint name will always be lowercase
-        self.local.endpoint_name = request.endpoint
-        # This will yield strings like "/v1.1/apm/<int:apm_id>/endpoint"
-        self.local.url_rule = request.url_rule.rule if request.url_rule is not None else None
-        # We want to tell the difference between a "real" 404 and a 404 returned by an existing view
-        self.local.is_not_found = isinstance(request.routing_exception, exceptions.NotFound)
+        return response

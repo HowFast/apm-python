@@ -10,7 +10,8 @@ from unittest.mock import MagicMock, patch
 from datetime import datetime, timezone
 
 
-def create_app():
+@pytest.fixture()
+def app():
     app = Quart("test")
 
     @app.route('/')
@@ -55,27 +56,27 @@ def HowFastQuartMiddleware():
 
 
 @pytest.mark.asyncio
-async def test_ok_without_dsn(HowFastQuartMiddleware):
+async def test_ok_without_dsn(app, HowFastQuartMiddleware):
     """ The middleware should install on a Flask application even with no DSN """
-    app = create_app()
     # No DSN passed
     middleware = HowFastQuartMiddleware(app)
 
     tester = app.test_client()
     response = await tester.get('/')
     assert response.status_code == 200
+    assert await response.get_data() == b"ok"
     assert middleware._save_point.called is False
 
 
 @pytest.mark.asyncio
-async def test_ok_with_dsn(HowFastQuartMiddleware):
+async def test_ok_with_dsn(app, HowFastQuartMiddleware):
     """ The middleware should install on a Flask application """
-    app = create_app()
     middleware = HowFastQuartMiddleware(app, app_id='some-dsn')
 
     tester = app.test_client()
     response = await tester.get('/')
     assert response.status_code == 200
+    assert await response.get_data() == b"ok"
     assert middleware._save_point.called is True
     assert middleware._save_point.call_count == 1
     point = middleware._save_point.call_args[1]
@@ -95,9 +96,8 @@ async def test_ok_with_dsn(HowFastQuartMiddleware):
 
 
 @pytest.mark.asyncio
-async def test_with_exception(HowFastQuartMiddleware):
+async def test_with_exception(app, HowFastQuartMiddleware):
     """ The middleware should gracefully handle routes that raise an Exception """
-    app = create_app()
     middleware = HowFastQuartMiddleware(app, app_id='some-dsn')
 
     tester = app.test_client()
@@ -114,9 +114,8 @@ async def test_with_exception(HowFastQuartMiddleware):
 
 
 @pytest.mark.asyncio
-async def test_with_error(HowFastQuartMiddleware):
+async def test_with_error(app, HowFastQuartMiddleware):
     """ The middleware should gracefully handle routes that raise an Error """
-    app = create_app()
     middleware = HowFastQuartMiddleware(app, app_id='some-dsn')
 
     tester = app.test_client()
@@ -135,9 +134,8 @@ async def test_with_error(HowFastQuartMiddleware):
 
 
 @pytest.mark.asyncio
-async def test_with_path_parameter(HowFastQuartMiddleware):
+async def test_with_path_parameter(app, HowFastQuartMiddleware):
     """ Endpoints with a path parameter should be deduplicated """
-    app = create_app()
     middleware = HowFastQuartMiddleware(app, app_id='some-dsn')
 
     tester = app.test_client()
@@ -150,9 +148,8 @@ async def test_with_path_parameter(HowFastQuartMiddleware):
 
 
 @pytest.mark.asyncio
-async def test_not_found(HowFastQuartMiddleware):
+async def test_not_found(app, HowFastQuartMiddleware):
     """ Requests with no matching route should have their is_not_found flag set to true """
-    app = create_app()
     middleware = HowFastQuartMiddleware(app, app_id='some-dsn')
 
     tester = app.test_client()
@@ -178,9 +175,8 @@ async def test_not_found(HowFastQuartMiddleware):
 
 
 @pytest.mark.asyncio
-async def test_blacklist_option(HowFastQuartMiddleware):
+async def test_blacklist_option(app, HowFastQuartMiddleware):
     """ URLs in the blacklist should not be tracked """
-    app = create_app()
     middleware = HowFastQuartMiddleware(
         app,
         app_id='some-dsn',
@@ -200,10 +196,9 @@ async def test_blacklist_option(HowFastQuartMiddleware):
 
 @patch('requests.put')
 @pytest.mark.asyncio
-async def test_interactions_option(put_mocked, HowFastQuartMiddleware):
+async def test_interactions_option(app, put_mocked, HowFastQuartMiddleware):
     """ The record_interactions parameter should be accepted """
     from howfast_apm import HowFastQuartMiddleware
-    app = create_app()
     middleware = HowFastQuartMiddleware(
         app,
         app_id='some-dsn',
