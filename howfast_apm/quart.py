@@ -2,7 +2,9 @@ import logging
 from typing import List
 from datetime import datetime, timezone
 from timeit import default_timer as timer
-from quart import Quart
+from quart import Quart, request, exceptions
+from quart.signals import request_started
+from werkzeug import local
 
 from .core import CoreAPM
 from .utils import is_in_blacklist, compile_endpoints
@@ -26,10 +28,16 @@ class HowFastQuartMiddleware(CoreAPM):
             # Other configuration parameters passed to the CoreAPM constructor
             **kwargs,
     ):
+
         super().__init__(**kwargs)
 
         self.app = app
         self.asgi_app = app.asgi_app
+
+        # We need to store thread local information, let's use Werkzeug's context locals
+        # (see https://werkzeug.palletsprojects.com/en/1.0.x/local/)
+        self.local = local.Local()
+        self.local_manager = local.LocalManager([self.local])
 
         # Overwrite the passed ASGI application
         app.asgi_app = self
@@ -41,6 +49,15 @@ class HowFastQuartMiddleware(CoreAPM):
 
         # Setup the queue and the background thread
         self.setup(app_id)
+
+        request_started.connect(
+            self._request_started,
+            # I'm not completely sure why, but it looks like the receiver function is somehow
+            # recognized as out of scope, which resets the reference. If the receiver is defined at
+            # the module level (outside of the class) then it works. To avoid the reference being
+            # reset, we have to explicitly ask it not be reset.
+            weak=False,
+        )
 
     async def __call__(self, scope, receive, send):
         if not self.app_id:
@@ -91,11 +108,30 @@ class HowFastQuartMiddleware(CoreAPM):
                 method=method,
                 uri=uri,
                 response_status=str(instance['response_status']),
-                # Metadata
-                # TODO: extract endpoint name / URL rule
-                endpoint_name=uri,
-                # url_rule="",
-                # is_not_found="",
+                # Request metadata
+                endpoint_name=getattr(self.local, 'endpoint_name', None),
+                url_rule=getattr(self.local, 'url_rule', None),
+                is_not_found=getattr(self.local, 'is_not_found', None),
             )
+            # Werkzeug locals are designed for use in WSGI, so for ASGI we cannot use the helpful
+            # local_manager.make_middleware() to clean the locals after each request - we do it
+            # manually here instead
+            self.local_manager.cleanup()
 
         return response
+
+    async def _request_started(self, sender, **kwargs):
+        async with sender.app_context():
+            self._save_request_metadata()
+
+    def _save_request_metadata(self):
+        """ Extract and save request metadata in the context local """
+        # This will yield strings like:
+        # * "monitor" (when the endpoint is defined using a resource)
+        # * "apm-collection.store_points" (when the endpoint is defined with a blueprint)
+        # The endpoint name will always be lowercase
+        self.local.endpoint_name = request.endpoint
+        # This will yield strings like "/v1.1/apm/<int:apm_id>/endpoint"
+        self.local.url_rule = request.url_rule.rule if request.url_rule is not None else None
+        # We want to tell the difference between a "real" 404 and a 404 returned by an existing view
+        self.local.is_not_found = isinstance(request.routing_exception, exceptions.NotFound)
