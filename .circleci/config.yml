@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/python:3.6.9
+      - image: cimg/python:3.12.7
     steps:
       - checkout
 
@@ -21,7 +21,7 @@ jobs:
 
       - run:
           name: lint code
-          command: poetry run flake8 howfast_apm tests
+          command: poetry run ruff check
 
       - run:
           name: run tests
