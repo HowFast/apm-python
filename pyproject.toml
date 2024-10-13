@@ -33,13 +33,12 @@ werkzeug = {version = ">=0.7", optional = true}
 blinker = {version = ">=1.1", optional = true}
 
 [tool.poetry.dev-dependencies]
-pytest = "^5"
-coverage = "^4.5"
-ruff = {version="^0.6.9", extras=["d"]}
-yapf = "^0.28.0"
+pytest = "^8.3"
+coverage = "^7.4"
+ruff = {version="^0.6.9"}
 mypy = "^1.11"
-coveralls = "^1.8"
-ipdb = "^0.12.2"
+coveralls = "^3.3"
+ipdb = "^0.13.13"
 pytest-watch = "^4.2"
 
 [tool.poetry.extras]
