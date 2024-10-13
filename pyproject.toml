@@ -26,8 +26,8 @@ classifiers=[
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.6,<3.9"
-requests = "^2.22"
+python = ">=3.9.20,<3.13"
+requests = ">=2.22"
 flask = {version = ">=0.8", optional = true}
 werkzeug = {version = ">=0.7", optional = true}
 blinker = {version = ">=1.1", optional = true}
@@ -37,7 +37,7 @@ pytest = "^5"
 coverage = "^4.5"
 flake8 = "^3.7"
 yapf = "^0.28.0"
-mypy = "^0.720.0"
+mypy = "^1.11"
 coveralls = "^1.8"
 ipdb = "^0.12.2"
 pytest-watch = "^4.2"
