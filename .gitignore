@@ -35,6 +35,7 @@ pip-delete-this-directory.txt
 nosetests.xml
 coverage.xml
 htmlcov
+.pytest_cache
 
 # Translations
 *.mo
@@ -45,3 +46,4 @@ docs/_build/
 # Dev tools
 .mypy_cache
 .coverage
+.ruff_cache
